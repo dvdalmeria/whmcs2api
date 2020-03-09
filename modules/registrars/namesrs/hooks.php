@@ -12,10 +12,13 @@ add_hook("AfterRegistrarRegistration",1,function($vars)
     $vars
   );
   // set domain to PENDING status - until the callback/webhook updates it accordingly
-  localAPI('UpdateClientDomain',Array(
-    'domainid' => $vars['params']['domainid'],
-    'status' => 'Pending Registration'
-  ));
+  if($vars['params']['registrar']=='namesrs')//Only launch hook in this module
+  {
+    localAPI('UpdateClientDomain',Array(
+      'domainid' => $vars['params']['domainid'],
+      'status' => 'Pending Registration'
+    ));
+  }
 });
 
 add_hook("AfterRegistrarTransfer",1,function($vars)
@@ -27,10 +30,13 @@ add_hook("AfterRegistrarTransfer",1,function($vars)
     $vars
   );
   // set domain to PENDING status - until the callback/webhook updates it accordingly
-  localAPI('UpdateClientDomain',Array(
-    'domainid' => $vars['params']['domainid'],
-    'status' => 'Pending Transfer'
-  ));
+  if($vars['params']['registrar']=='namesrs')
+  {
+    localAPI('UpdateClientDomain',Array(
+      'domainid' => $vars['params']['domainid'],
+      'status' => 'Pending Transfer'
+    ));
+  }
 });
 
 use WHMCS\View\Menu\Item as MenuItem;
@@ -43,9 +49,9 @@ add_hook('ClientAreaPrimarySidebar', 1, function (MenuItem $primarySidebar)
   $sidebar = $primarySidebar->getChild('Domain Details Management');
   if($sidebar)
   {
-    $sidebar->removeChild('Domain Contacts');
-    $sidebar->removeChild('Manage Private Nameservers');
-    $sidebar->removeChild('Manage Email Forwarding');
+    //$sidebar->removeChild('Domain Contacts');
+    //$sidebar->removeChild('Manage Private Nameservers');
+    //$sidebar->removeChild('Manage Email Forwarding');
+    //Remove this link in all modules.
   }
 });
-

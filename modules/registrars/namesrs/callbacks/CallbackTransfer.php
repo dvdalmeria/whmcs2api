@@ -21,6 +21,17 @@ if($status == 2000)
     $values["domainid"] = $req['domain_id'];
     $values['status'] = 'Active';
     $results 	= localAPI($command, $values, $admin);
+
+    //Send customer notification
+    $postData = array(
+       'messagename' => 'Domain Transfer Completed',
+        'id' =>$req['domain_id']
+    );
+    $results = localAPI('SendEmail', $postData,  $admin);
+    //Send customer notification
+
+
+
   }
   elseif($substatus == 2004 OR $substatus == 4998)
   {
@@ -32,6 +43,16 @@ if($status == 2000)
       'Main status = 2000, substatus = '.$substatus.', domain = '.$req['domain']
     );
     domainStatus($req['domain_id'], 'Cancelled');
+
+    //Send customer notification
+    $postData = array(
+       'messagename' => 'Domain Transfer Failed',
+        'id' =>$req['domain_id']
+    );
+    $admin= getAdminUser();
+    $results = localAPI('SendEmail', $postData,  $admin);
+    //Send customer notification
+
   }
   else
   {
@@ -59,6 +80,28 @@ elseif($status == 300)
     'Main status ('.$status.' = '.$status_name.'), substatus ('.$substatus.' = '.$substatus_name.'), domain = '.$req['domain']
   );
   domainStatus($req['domain_id'], 'Transferred Away');
+
+  }
+  elseif($status == 4000)
+  {
+    //Transfer fail because authcode is bad or empy
+
+    logModuleCall(
+      'namesrs',
+      'callback_transfer_failed',
+      $json,
+      'Main status = 4000, substatus = '.$substatus.', domain = '.$req['domain']
+    );
+    domainStatus($req['domain_id'], 'Cancelled');
+
+    //Send customer notification
+    $postData = array(
+       'messagename' => 'Domain Transfer Failed',
+        'id' =>$req['domain_id']
+    );
+       $admin= getAdminUser();
+       $results = localAPI('SendEmail', $postData,  $admin);
+       //Send customer notification
 }
 else
 {

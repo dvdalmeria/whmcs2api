@@ -18,6 +18,17 @@ if($status == 200 OR ($status == 2000 AND $substatus == 2001))
   $values["domainid"] = $req['domain_id'];
   $values['status'] = 'Active';
   $results 	= localAPI($command, $values, $admin);
+
+
+
+    //Send customer notification
+    		$postData = array(
+       		'messagename' => 'Domain Registration Confirmation',
+        		'id' =>$req['domain_id']);
+    		$results = localAPI('SendEmail', $postData, $admin);
+        //Send customer notification
+
+
 }
 elseif(in_array((int)$status, Array(2,10,11,4000)))
 {
@@ -48,7 +59,7 @@ elseif($status == 500 OR $status == 503 OR $status == 504)
       $statName = 'Grace';
       break;
     default:
-      $statName = 'Expired'; 
+      $statName = 'Expired';
   }
   domainStatus($req['domain_id'], $statName);
 }

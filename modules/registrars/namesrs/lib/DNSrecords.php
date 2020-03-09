@@ -160,6 +160,18 @@ function namesrs_SaveDNS($params)
       }
     }
     return array('success' => 'success');
+    //Check correct dns
+    $api = new RequestSRS($params);
+    $domain = $api->searchDomain();
+    $ns = $domain['nameservers'];
+    $values["ns1"] = $ns[0]['nameserver'];
+
+    if($ns[0]['nameserver']!='ns1.nameisp.info'){
+      return array('error' => 'Error For dns parking to work you need to configure the following dns in the domain ns1.nameisp.info and ns2.nameisp.info');
+    }else{
+      return array('success' => 'success');
+    }
+    //Check correct dns
   }
   catch (Exception $e)
   {

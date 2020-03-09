@@ -130,4 +130,146 @@ function namesrs_DeleteNameserver($params)
   return Array('error' => 'Not supported');
 }
 
+//Domain status LOG from WHMCS
+function namesrs_domain_status($params)
+{
+      //Api request status
+      $api = new RequestSRS($params);
+      $result = $api->request('GET', "/request/requestlist", ['domainname' => $params['original']['domainname']]);
+      echo '<br>History Status domain: '.$params['original']['domainname'].' <br>';
+      foreach ($result['requests'] as $request)
+			{
+					foreach ($request['substatus'] as $status){$substatus.=" ".$status;}
+ 	 					echo ' Request Date: '.$request['created'].' reqType: '.$request['reqType'].' substatus: <strong>'.$substatus.'</strong>';
+						if($request['error'][0]['desc']!=''){
+							echo 'Request error: <strong><font color=red>'.$request['error'][0]['desc'].'</font></strong>';
+						}
+						echo '<br>'; $substatus='';
+			}
+
+      $list = $api->request('GET', "/domain/domainlist", ['domainname' => $params['original']['domainname'], 'status' => 200]);
+      	if ($list)
+      	{
+        $handle = $list['items'][0]['itemID'];
+      	}
+
+      if(count($handle)>0){
+      $result = $api->request('GET', "/domain/domaindetails", ['itemid' => $handle]);
+      $domain = $result['items'][$handle];
+      DomainCache::put($domain);
+
+        //Return info domain
+     	  switch($domain['tldrules']['status'])
+    	  {
+     	   case 200:
+     	   case 201:
+           $statusName = 'Active';
+          break;
+       	 case 300:
+          $statusName = 'Pending Transfer';
+          break;
+       	 case 500:
+          $statusName = 'Expired';
+          break;
+       	 case 503:
+          $statusName = 'Redemption';
+          break;
+       	 case 504:
+          $statusName = 'Grace';
+          break;
+       	 case 2:
+       	 case 10:
+       	 case 11:
+        	case 400:
+       	 case 4000:
+       	 case 4006:
+          $statusName = 'Pending';
+     	 }
+
+
+			 //Return real status:
+	  	echo "<br><br>Domain status: <strong>".$statusName."</strong><br>Expiration Date: ".$domain['expires']."<br>Created Date: ".$domain['created'];
+      echo '<br><br>';
+
+
+		 }
+
+    return true;
+}
+
+//Domain sync status
+function namesrs_domain_sync($params)
+{
+
+      //Api request status
+      $api = new RequestSRS($params);
+
+      $list = $api->request('GET', "/domain/domainlist", ['domainname' => $params['original']['domainname'], 'status' => 200]);
+      	if ($list)
+      	{
+        	$handle = $list['items'][0]['itemID'];
+      	}
+
+      if(count($handle)>0){
+      $result = $api->request('GET', "/domain/domaindetails", ['itemid' => $handle]);
+      $domain = $result['items'][$handle];
+      DomainCache::put($domain);
+
+        //Return info domain
+     	  switch($domain['tldrules']['status'])
+    	  {
+     	   case 200:
+     	   case 201:
+           $statusName = 'Active';
+          break;
+       	 case 300:
+          $statusName = 'Pending Transfer';
+          break;
+       	 case 500:
+          $statusName = 'Expired';
+          break;
+       	 case 503:
+          $statusName = 'Redemption';
+          break;
+       	 case 504:
+          $statusName = 'Grace';
+          break;
+       	 case 2:
+       	 case 10:
+       	 case 11:
+         case 400:
+       	 case 4000:
+       	 case 4006:
+          $statusName = 'Pending';
+     	 }
+		 }
+		 $command = 'UpdateClientDomain';
+		 $postData = array(
+		     'domainid' => $params['domainid'],
+ 			   'status' => $statusName,
+         'expirydate' => $domain['expires'],
+				 'nextduedate' => $domain['expires']
+		 );
+		  $admin   	= "david";//getAdminUser();
+			if($statusName!='Pending'&&$params['domainid']!='')
+			{
+			$results = localAPI($command, $postData, $admin);
+				return array('success' => 'success');
+			}else{
+				return array('error' => 'Invalid domain');
+			}
+}
+//Add buttons whmcs admin
+function namesrs_AdminCustomButtonArray() {
+   $buttonarray = array(
+ 	 	 "DomainStatus" => "domain_status",
+		 "DomainSync" => "domain_sync"
+
+	);
+	return $buttonarray;
+
+}
+//Domain status PH mod for staff.
+
+
 if( php_sapi_name() != 'cli' ) include dirname(__FILE__).'/install.php';
