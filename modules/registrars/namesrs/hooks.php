@@ -55,3 +55,14 @@ add_hook('ClientAreaPrimarySidebar', 1, function (MenuItem $primarySidebar)
     //Remove this link in all modules.
   }
 });
+
+
+//PH I cancel send email registration confirmation
+add_hook("EmailPreSend",1,function($vars)
+{
+  if($vars['mergefields']['domain_registrar']=='namesrs')
+  {
+    if ($vars['messagename']=='Domain Registration Confirmation') {$merge_fields = [];$merge_fields['abortsend'] = true; return $merge_fields;}
+  }
+});
+//PH I cancel send email registration confirmation
