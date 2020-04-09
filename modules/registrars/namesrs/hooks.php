@@ -57,12 +57,13 @@ add_hook('ClientAreaPrimarySidebar', 1, function (MenuItem $primarySidebar)
 });
 
 
-//PH I cancel send email registration confirmation
+//We cancel send email registration confirmation
 add_hook("EmailPreSend",1,function($vars)
 {
-  if($vars['mergefields']['domain_registrar']=='namesrs')
+
+  if($vars['mergefields']['domain_registrar']=='namesrs'&&$vars['mergefields']['domain_status']=='Pending Registration')
   {
     if ($vars['messagename']=='Domain Registration Confirmation') {$merge_fields = [];$merge_fields['abortsend'] = true; return $merge_fields;}
   }
 });
-//PH I cancel send email registration confirmation
+//We cancel send email registration confirmation
