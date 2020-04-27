@@ -37,8 +37,8 @@ function namesrs_SaveNameservers($params)
   {
 
     //Precheck dns resolv.
-    if(gethostbyname($params["ns1"])!=NULL)
-    {
+    if(filter_var(gethostbyname($params["ns1"]), FILTER_VALIDATE_IP))
+    {    
     //Precheck dns resolv.
       $api = new RequestSRS($params);
       $nameServers = array();
